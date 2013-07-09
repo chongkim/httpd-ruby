@@ -15,3 +15,32 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = 'random'
 end
+
+require "httpserver"
+
+def port
+  5001
+end
+
+def start_http_server(port)
+  server = HTTPServer.new(port)
+  server.create_server
+  calling_thread = Thread.current
+  Thread.new {
+    begin
+      server.accept_loop
+    rescue Exception => e
+      calling_thread.raise(e)
+    end
+  }
+  server
+end
+
+def client_send(uri)
+  socket = TCPSocket.new("localhost", port)
+  socket.write("GET #{uri} HTTP/1.0\r\n\r\n")
+  content = timeout(0.3) { socket.read }
+  socket.close
+  content
+end
+
