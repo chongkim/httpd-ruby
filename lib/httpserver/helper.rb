@@ -12,5 +12,9 @@ class HTTPServer
   def pathname(filename)
     "#{public_dir}#{filename}"
   end
+
+  def debug=(bool)
+    logger.debug = true
+  end
 end
 

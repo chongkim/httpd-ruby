@@ -1,4 +1,6 @@
 require "httpserver"
+require "httparty"
+require "cucumber/rspec/doubles"
 
 Before do |scenario|
   @local = {}
@@ -10,8 +12,12 @@ After do |scenario|
   end
 end
 
-Given(/^an HTTP server on port (\d+)$/) do |port|
-  @local[:server] = HTTPServer.new(port)
+Given(/^port is (\d+)$/) do |port|
+  @port = port
+end
+
+Given(/^an HTTP server$/) do
+  @local[:server] = HTTPServer.new(@port)
   @local[:server].create_server
   calling_thread = Thread.current
   Thread.new {
@@ -30,17 +36,28 @@ Given(/^a file "(.*?)" with$/) do |filename, string|
 end
 
 When(/^I fetch "(.*?)"$/) do |url|
-  _, protocol, host, port, uri = %r{(.*)://(.*):(\d+)(.*)}.match(url).to_a
-  client = TCPSocket.new(host, port)
-  client.write("GET #{uri} HTTP/1.0\r\n\r\n")
-  @local[:header], @local[:content] = timeout(0.3) { client.read.split(/\r\n\r\n|\n\n/) }
+  @local[:response] = HTTParty.get(url)
+end
+
+When(/^I crash the server$/) do
+  client = TCPSocket.new("localhost", @port)
+  client.write("CRASH / HTTP/1.0\r\n\r\n")
+  header, body =  timeout(0.3) { client.read.split(/\r\n\r\n|\n\n/) }
+  code = header.split(/\s+/)[1].to_i
+  require "rspec/mocks/standalone"
+  double
+  @local[:response] = double(:body => body, :code => code)
   client.close
 end
 
 Then(/^I should see "(.*?)"$/) do |string|
-  @local[:content].should include(string)
+  @local[:response].body.should include(string)
 end
 
 Then(/^the return code is (\d+)$/) do |code|
-  @local[:header].split(/\s+/)[1].should == code.to_s
+  @local[:response].code.should == code.to_i
+end
+
+Then(/^there is a link to "(.*?)"$/) do |link|
+  @local[:response].body.should include("<a href=\"/#{link}\">#{link}</a>")
 end

@@ -3,9 +3,27 @@
 
 $LOAD_PATH << File.expand_path("../../lib", __FILE__)
 
-require "httpserver"
+require "autoreload"
 
-server = HTTPServer.new(5000)
-server.public_dir = "/Users/ckim/clone/cob_spec/public/"
+autoreload(:interval => 2) {
+  require "httpserver"
+}
+
+require "optparse"
+
+options = {
+  :port => 5000,
+  :dir => "public"
+}
+
+ARGV.options do |opts|
+  opts.on("-p <port>", "port", Integer) { |port| options[:port] = port }
+  opts.on("-d <dir>", "directory") { |dir| options[:dir] = dir }
+end.parse!
+
+server = HTTPServer.new(options[:port])
+server.public_dir = options[:dir]
+server.debug = true
+server.config.redirect["/redirect"] = "http://localhost:#{options[:port]}/"
 server.start_loop
 

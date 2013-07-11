@@ -29,8 +29,8 @@ describe HTTPServer do
           calling_thread.raise(e)
         end
       }
-      client_send("/index.html").should include("hello")
-      client_send("/index.html").should include("hello")
+      HTTParty.get("http://localhost:#{port}/index.html").body.should include("hello")
+      HTTParty.get("http://localhost:#{port}/index.html").body.should include("hello")
       server.close
     end
   end

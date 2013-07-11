@@ -3,7 +3,7 @@
 
 def xguard(*args); end
 
-guard 'cucumber', :cli => "-f pretty" do
+guard 'cucumber', :cli => "-f pretty -s" do
   watch(%r{^lib/.+$})
   watch(%r{^features/.+\.feature$})
   watch(%r{^features/support/.+$})          { 'features' }
@@ -31,3 +31,8 @@ guard :rspec, :cli => "-f documentation" do
   watch(%r{^spec/acceptance/steps/(.+)_steps\.rb$})   { |m| Dir[File.join("**/#{m[1]}.feature")][0] || 'spec/acceptance' }
 end
 
+
+guard 'ctags-bundler', :src_path => ["lib", "spec/support"] do
+  watch(/^(lib|spec\/support)\/.*\.rb$/)
+  watch('Gemfile.lock')
+end

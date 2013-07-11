@@ -8,13 +8,13 @@ describe HTTPServer::Response do
     end
   end
 
-  context "#content" do
-    it "should store the content" do
+  context "#body" do
+    it "should store the body" do
       request = double
       response = HTTPServer::Response.new(request)
       response << "foo"
       response << " bar"
-      response.content.should == "foo bar"
+      response.body.should == "foo bar"
     end
   end
 
@@ -24,7 +24,7 @@ describe HTTPServer::Response do
       response = HTTPServer::Response.new(request)
       response.code = 404
       response.code.should == 404
-      response.status.should include("404 Not found")
+      response.status.should include("404 Not Found")
     end
   end
 
