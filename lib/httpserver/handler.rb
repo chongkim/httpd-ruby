@@ -5,6 +5,7 @@ class HTTPServer
     raise "crash" if request.http_method == :crash
     return handle_redirect(request, response) if config.redirect[request.filename]
     filename = pathname(request.filename)
+    return handle_deny(request, response) if config.deny?(request.http_method, request.filename)
     case request.http_method
     when :get
       return handle_directory(request, response) if File.directory?(filename)
@@ -23,6 +24,10 @@ class HTTPServer
     response.body = nil
     logger.debug(:handler, $!)
     logger.debug(:handler, $@)
+  end
+
+  def handle_deny(request, response)
+    response.code = 405
   end
 
   def handle_redirect(request, response)

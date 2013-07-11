@@ -25,5 +25,7 @@ server = HTTPServer.new(options[:port])
 server.public_dir = options[:dir]
 server.debug = true
 server.config.redirect["/redirect"] = "http://localhost:#{options[:port]}/"
+server.config.deny[:put] << "/file1"
+server.config.deny[:post] << "/text-file.txt"
 server.start_loop
 

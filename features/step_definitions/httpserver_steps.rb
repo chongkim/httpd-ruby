@@ -61,3 +61,19 @@ end
 Then(/^there is a link to "(.*?)"$/) do |link|
   @local[:response].body.should include("<a href=\"/#{link}\">#{link}</a>")
 end
+
+Given(/^I configure deny put "(.*?)"$/) do |uri|
+  @local[:server].config.deny[:put] << uri
+end
+
+Given(/^I configure deny post "(.*?)"$/) do |uri|
+  @local[:server].config.deny[:post] << uri
+end
+
+When(/^I put "(.*?)" with$/) do |url, string|
+  @local[:response] = HTTParty.put(url, :body => string)
+end
+
+When(/^I post "(.*?)" with$/) do |url, string|
+  @local[:response] = HTTParty.post(url, :body => string)
+end

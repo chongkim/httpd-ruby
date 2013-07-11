@@ -36,3 +36,18 @@ Feature: Implement an HTTP server
     Then the return code is 500
     When I fetch "http://localhost:5001/index.html"
     Then the return code is 200
+
+  Scenario:  Method Not Allowed
+    Given an HTTP server
+    And I configure deny put "/file1"
+    And I configure deny post "/text-file.txt"
+    When I put "http://localhost:5001/file1" with
+    """
+    foo
+    """
+    Then the return code is 405
+    When I post "http://localhost:5001/text-file.txt" with
+    """
+    a=b
+    """
+    Then the return code is 405
